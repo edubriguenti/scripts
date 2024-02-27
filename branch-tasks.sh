@@ -1,16 +1,18 @@
 #!/bin/bash
 
 # Defina a lista de repositórios
-repositories=("repo1" "repo2" "repo3")
+repositories=("https://exemplo.com/repo1.git" "https://exemplo.com/repo2.git" "https://exemplo.com/repo3.git")
 
 # Função para criar branches de release em diferentes repositórios
 create_release_branch() {
     local release_branch=$1
     for repo in "${repositories[@]}"
     do
-        git -C $repo checkout -b $release_branch
-        git -C $repo push origin $release_branch
-        echo "Branch de release $release_branch criada em $repo"
+        repo_name=$(basename "$repo" .git)
+        git clone "$repo"
+        git -C "$repo_name" checkout -b "$release_branch"
+        git -C "$repo_name" push origin "$release_branch"
+        echo "Branch de release $release_branch criada em $repo_name"
     done
 }
 
@@ -19,10 +21,11 @@ merge_release_to_master() {
     local release_branch=$1
     for repo in "${repositories[@]}"
     do
-        git -C $repo checkout master
-        git -C $repo merge --no-ff $release_branch
-        git -C $repo push origin master
-        echo "Merge da branch de release $release_branch em master concluído em $repo"
+        repo_name=$(basename "$repo" .git)
+        git -C "$repo_name" checkout master
+        git -C "$repo_name" merge --no-ff "$release_branch"
+        git -C "$repo_name" push origin master
+        echo "Merge da branch de release $release_branch em master concluído em $repo_name"
     done
 }
 
